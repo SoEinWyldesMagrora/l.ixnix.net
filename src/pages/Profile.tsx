@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import PronounLanguageSection from '../components/PronounLanguageSection';
 import ProfileShare from '../components/ProfileShare';
 import { User } from '../types/user';
-import { Link as LinkIcon, Settings, User as UserIcon } from 'lucide-react';
+import { Link as LinkIcon, Settings, User as UserIcon, Disc as Discord, Pencil } from 'lucide-react';
 
 const Profile: React.FC = () => {
   const { username } = useParams();
@@ -12,9 +12,13 @@ const Profile: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [discordLink, setDiscordLink] = useState('');
+  const [customLink, setCustomLink] = useState({ label: '', url: '' });
+  const [editingSymbol, setEditingSymbol] = useState(false);
   const navigate = useNavigate();
 
-  // German pronoun options
+  const symbols = ['★', '♠', '♣', '♥', '♦', '♪', '♫', '☀', '☁', '☂', '☃', '☄', '☎', '☮', '☯', '☸', '☹', '☺', '♈', '♉'];
+
   const germanPronouns = [
     { id: 'sie/ihr', label: 'sie/ihr' },
     { id: 'er/ihm', label: 'er/ihm' },
@@ -22,7 +26,6 @@ const Profile: React.FC = () => {
     { id: 'sie/ihnen', label: 'sie/ihnen' }
   ];
 
-  // English pronoun options
   const englishPronouns = [
     { id: 'they/them', label: 'they/them' },
     { id: 'she/her', label: 'she/her' },
@@ -35,21 +38,27 @@ const Profile: React.FC = () => {
       setIsLoading(true);
       try {
         if (username) {
-          // In a real app, we would fetch the user from an API
-          // For now, we'll just use the current user if usernames match
           if (currentUser && currentUser.username === username) {
             setUser(currentUser);
+            setDiscordLink(currentUser.links?.discord || '');
+            setCustomLink(currentUser.links?.custom || { label: '', url: '' });
           } else {
-            // Mock fetching another user
             const mockUser: User = {
               id: '456',
               email: 'mock@example.com',
               username: username,
               displayName: username,
-              avatarUrl: 'https://via.placeholder.com/150',
+              profileSymbol: '★',
               pronouns: {
                 de: ['sie/ihr'],
                 en: ['they/them']
+              },
+              links: {
+                discord: 'username#1234',
+                custom: {
+                  label: 'Website',
+                  url: 'https://example.com'
+                }
               }
             };
             setUser(mockUser);
@@ -57,6 +66,8 @@ const Profile: React.FC = () => {
           }
         } else if (currentUser) {
           setUser(currentUser);
+          setDiscordLink(currentUser.links?.discord || '');
+          setCustomLink(currentUser.links?.custom || { label: '', url: '' });
           setIsEditing(true);
         } else {
           navigate('/login');
@@ -89,10 +100,36 @@ const Profile: React.FC = () => {
     }
   };
 
+  const handleSaveLinks = () => {
+    if (!user || !isEditing) return;
+
+    const newLinks = {
+      discord: discordLink,
+      custom: customLink.label && customLink.url ? customLink : undefined
+    };
+
+    setUser({ ...user, links: newLinks });
+    
+    if (currentUser) {
+      updateProfile({ links: newLinks });
+    }
+  };
+
+  const handleSymbolChange = (symbol: string) => {
+    if (!user || !isEditing) return;
+    
+    setUser({ ...user, profileSymbol: symbol });
+    setEditingSymbol(false);
+    
+    if (currentUser) {
+      updateProfile({ profileSymbol: symbol });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
       </div>
     );
   }
@@ -104,7 +141,7 @@ const Profile: React.FC = () => {
         <p className="mb-4">The user you're looking for doesn't exist.</p>
         <button 
           onClick={() => navigate('/')}
-          className="bg-pink-600 text-white px-4 py-2 rounded-md hover:bg-pink-700 transition-colors"
+          className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors"
         >
           Go Home
         </button>
@@ -114,20 +151,22 @@ const Profile: React.FC = () => {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-        <div className="bg-gradient-to-r from-pink-500 to-purple-600 p-6 text-white">
+      <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-md overflow-hidden mb-6">
+        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 text-white">
           <div className="flex items-center mb-4">
-            {user.avatarUrl ? (
-              <img 
-                src={user.avatarUrl} 
-                alt={user.displayName || user.username} 
-                className="w-20 h-20 rounded-full border-4 border-white object-cover"
-              />
-            ) : (
-              <div className="w-20 h-20 rounded-full border-4 border-white bg-pink-300 flex items-center justify-center">
-                <UserIcon size={40} className="text-white" />
+            <div className="relative">
+              <div className="w-20 h-20 rounded-full border-4 border-white bg-indigo-300 flex items-center justify-center text-4xl">
+                {user.profileSymbol || '★'}
               </div>
-            )}
+              {isEditing && (
+                <button
+                  onClick={() => setEditingSymbol(!editingSymbol)}
+                  className="absolute -bottom-2 -right-2 bg-white text-indigo-600 rounded-full p-1 shadow-md hover:bg-indigo-50 transition-colors"
+                >
+                  <Pencil size={16} />
+                </button>
+              )}
+            </div>
             <div className="ml-4">
               <h1 className="text-2xl font-bold">@{user.username}</h1>
               {user.displayName && user.displayName !== user.username && (
@@ -135,6 +174,90 @@ const Profile: React.FC = () => {
               )}
             </div>
           </div>
+
+          {editingSymbol && (
+            <div className="mt-4 p-4 bg-white/10 rounded-lg">
+              <h3 className="text-sm font-medium mb-2">Choose a Symbol</h3>
+              <div className="grid grid-cols-10 gap-2">
+                {symbols.map((symbol) => (
+                  <button
+                    key={symbol}
+                    onClick={() => handleSymbolChange(symbol)}
+                    className="w-8 h-8 flex items-center justify-center bg-white/20 rounded-md hover:bg-white/30 transition-colors text-xl"
+                  >
+                    {symbol}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {isEditing && (
+            <div className="space-y-4 mt-6 bg-white/10 rounded-lg p-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Discord Username</label>
+                <input
+                  type="text"
+                  value={discordLink}
+                  onChange={(e) => setDiscordLink(e.target.value)}
+                  placeholder="username#1234"
+                  className="w-full px-3 py-2 bg-white/20 rounded-md placeholder-white/50 text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Custom Link</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    value={customLink.label}
+                    onChange={(e) => setCustomLink({ ...customLink, label: e.target.value })}
+                    placeholder="Label"
+                    className="px-3 py-2 bg-white/20 rounded-md placeholder-white/50 text-white"
+                  />
+                  <input
+                    type="url"
+                    value={customLink.url}
+                    onChange={(e) => setCustomLink({ ...customLink, url: e.target.value })}
+                    placeholder="https://"
+                    className="px-3 py-2 bg-white/20 rounded-md placeholder-white/50 text-white"
+                  />
+                </div>
+              </div>
+              <button
+                onClick={handleSaveLinks}
+                className="w-full bg-white/20 hover:bg-white/30 text-white py-2 rounded-md transition-colors"
+              >
+                Save Links
+              </button>
+            </div>
+          )}
+
+          {!isEditing && user.links && (
+            <div className="flex gap-2 mt-4">
+              {user.links.discord && (
+                <a
+                  href={`https://discord.com/users/${user.links.discord}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 bg-[#5865F2] px-4 py-2 rounded-md hover:opacity-90 transition-opacity"
+                >
+                  <Discord size={20} />
+                  <span>{user.links.discord}</span>
+                </a>
+              )}
+              {user.links.custom && (
+                <a
+                  href={user.links.custom.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 bg-white/20 px-4 py-2 rounded-md hover:opacity-90 transition-opacity"
+                >
+                  <LinkIcon size={20} />
+                  <span>{user.links.custom.label}</span>
+                </a>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="p-6">

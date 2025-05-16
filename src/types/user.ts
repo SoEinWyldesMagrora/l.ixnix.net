@@ -4,9 +4,17 @@ export interface User {
   username: string;
   displayName?: string;
   avatarUrl?: string;
+  profileSymbol?: string;
   pronouns: {
     de: string[];
     en: string[];
+  };
+  links: {
+    discord?: string;
+    custom?: {
+      label: string;
+      url: string;
+    };
   };
 }
 

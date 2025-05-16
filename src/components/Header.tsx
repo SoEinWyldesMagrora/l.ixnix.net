@@ -7,9 +7,9 @@ const Header: React.FC = () => {
   const { currentUser, logout } = useAuth();
 
   return (
-    <header className="bg-white shadow-sm">
+    <header className="bg-white/80 backdrop-blur-sm shadow-sm">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-        <Link to="/" className="flex items-center text-xl font-bold text-pink-600">
+        <Link to="/" className="flex items-center text-xl font-bold text-indigo-600">
           <LinkIcon size={24} className="mr-2" />
           <span>l.ixnix.net</span>
         </Link>
@@ -21,7 +21,7 @@ const Header: React.FC = () => {
                 <li>
                   <Link 
                     to="/profile" 
-                    className="px-3 py-2 rounded-md hover:bg-pink-50 transition-colors"
+                    className="px-3 py-2 rounded-md hover:bg-indigo-50 transition-colors"
                   >
                     Profile
                   </Link>
@@ -29,7 +29,7 @@ const Header: React.FC = () => {
                 <li>
                   <button 
                     onClick={() => logout()} 
-                    className="px-3 py-2 rounded-md hover:bg-pink-50 transition-colors"
+                    className="px-3 py-2 rounded-md hover:bg-indigo-50 transition-colors"
                   >
                     Logout
                   </button>
@@ -40,7 +40,7 @@ const Header: React.FC = () => {
                 <li>
                   <Link 
                     to="/login" 
-                    className="px-3 py-2 rounded-md hover:bg-pink-50 transition-colors"
+                    className="px-3 py-2 rounded-md hover:bg-indigo-50 transition-colors"
                   >
                     Login
                   </Link>
@@ -48,7 +48,7 @@ const Header: React.FC = () => {
                 <li>
                   <Link 
                     to="/register" 
-                    className="px-4 py-2 bg-pink-600 text-white rounded-md hover:bg-pink-700 transition-colors"
+                    className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
                   >
                     Register
                   </Link>

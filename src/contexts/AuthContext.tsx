@@ -20,13 +20,17 @@ export const useAuth = () => {
   return context;
 };
 
+const symbols = ['★', '♠', '♣', '♥', '♦', '♪', '♫', '☀', '☁', '☂', '☃', '☄', '☎', '☮', '☯', '☸', '☹', '☺', '♈', '♉'];
+
+const getRandomSymbol = () => {
+  return symbols[Math.floor(Math.random() * symbols.length)];
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Mock authentication functions - would be replaced with real Firebase auth
   const login = async (email: string, password: string): Promise<UserCredential> => {
-    // Mock implementation
     return new Promise((resolve) => {
       setTimeout(() => {
         const user: User = {
@@ -34,10 +38,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           email,
           username: email.split('@')[0],
           displayName: email.split('@')[0],
-          avatarUrl: 'https://via.placeholder.com/150',
+          profileSymbol: getRandomSymbol(),
           pronouns: {
             de: [],
             en: []
+          },
+          links: {
+            discord: '',
+            custom: {
+              label: '',
+              url: ''
+            }
           }
         };
         setCurrentUser(user);
@@ -47,7 +58,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const register = async (email: string, password: string, username: string): Promise<UserCredential> => {
-    // Mock implementation
     return new Promise((resolve) => {
       setTimeout(() => {
         const user: User = {
@@ -55,10 +65,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           email,
           username,
           displayName: username,
-          avatarUrl: 'https://via.placeholder.com/150',
+          profileSymbol: getRandomSymbol(),
           pronouns: {
             de: [],
             en: []
+          },
+          links: {
+            discord: '',
+            custom: {
+              label: '',
+              url: ''
+            }
           }
         };
         setCurrentUser(user);
@@ -68,7 +85,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async (): Promise<void> => {
-    // Mock implementation
     return new Promise((resolve) => {
       setTimeout(() => {
         setCurrentUser(null);
@@ -78,7 +94,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const updateProfile = async (data: Partial<User>): Promise<void> => {
-    // Mock implementation
     return new Promise((resolve) => {
       setTimeout(() => {
         if (currentUser) {
@@ -90,7 +105,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    // Check if user is already logged in
     const savedUser = localStorage.getItem('user');
     if (savedUser) {
       setCurrentUser(JSON.parse(savedUser));
@@ -99,7 +113,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
-    // Save user to localStorage when it changes
     if (currentUser) {
       localStorage.setItem('user', JSON.stringify(currentUser));
     } else {
